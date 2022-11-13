@@ -135,6 +135,33 @@ public class UtilTest {
     }
 
     @Test
+    public void testAll() {
+        assertTrue(all(new Object[]{null, null, null, null}, null));
+        assertTrue(all(new Object[]{1, 1, 1, 1}, 1));
+        assertTrue(all(new Object[]{"abc", "abc", "abc", "abc"}, "abc"));
+
+        assertFalse(all(new Object[]{"abc", "abc", "abc", "1"}, "abc"));
+        assertFalse(all(new Object[]{"abc", "abc", "abc", null}, "abc"));
+        assertFalse(all(new Object[]{4, 3, 2, 1}, 4));
+        assertFalse(all(new Object[]{4, 3, 2, 1}, null));
+
+        List<String> list = new ArrayList<>();
+        list.add("abc");
+        list.add("abc");
+        list.add("abc");
+        assertTrue(all(list, "abc"));
+        list.add("def");
+        assertFalse(all(list, "abc"));
+
+        list.clear();
+        list.add(null);
+        list.add(null);
+        list.add(null);
+        assertTrue(all(list, null));
+        assertFalse(all(list, "def"));
+    }
+
+    @Test
     public void testScanf() {
         List<Object> out = new ArrayList<>();
         assertFalse(scanf("%c %s %d %l abc", "A -123 -456 9876543210 def", out));
@@ -217,7 +244,10 @@ public class UtilTest {
         assertTrue(inList(new String[]{"abc", "def", "123", null}, null));
         assertFalse(inList(new String[]{"abc", "def", "123"}, "xyz"));
 
+        assertTrue(inList(new String[]{null, null, null}, null));
+
         assertTrue(inList(new int[]{1, 2, 3}, 1));
+        assertEquals(0, search(new int[]{1, 2, 3}, 1));
         assertFalse(inList(new int[]{1, 2, 3}, 0));
         assertFalse(inList(new long[]{1, 2, 3}, 4));
         assertTrue(inList(new long[]{1, 2, 3}, 1));
@@ -225,6 +255,18 @@ public class UtilTest {
         assertEquals(1, search(2L, 1L, 2L, 3L));
         assertTrue(among(2L, 1L, 2L, 3L));
         assertFalse(among(20L, 1L, 2L, 3L));
+
+        List<String> list = new ArrayList<>();
+        list.add(null);
+        list.add("abc");
+        list.add("def");
+        assertTrue(inList(list, "abc"));
+        assertTrue(inList(list, null));
+        assertTrue(inList(list, "def"));
+        assertFalse(inList(list, "xyz"));
+
+        assertEquals(0, search(list, (String) null));
+        assertEquals(1, search(list, "abc"));
     }
 
     @Test

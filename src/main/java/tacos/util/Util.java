@@ -290,6 +290,24 @@ public class Util {
     }
 
     /**
+     * 判断列表中是否有对应数据，例如：
+     * <ul>
+     *   <li>inList(["abc", "def", "123"], null) ==> false</li>
+     *   <li>inList(["abc", "def", "123", null], null) ==> true</li>
+     *   <li>inList(["abc", "def", "123"], "xyz") ==> false</li>
+     *   <li>inList(["abc", "def", "123"], "123") ==> true</li>
+     * </ul>
+     *
+     * @param list 泛型对象实例列表
+     * @param t    泛型对象实例
+     * @param <T>  泛型对象类，类需要实现 equals 方法
+     * @return 在列表中返回 true，否则返回 false
+     */
+    public static <T> boolean inList(Collection<T> list, T t) {
+        return search(list, t) != -1;
+    }
+
+    /**
      * 在数组中查找对应的元素，并返回索引，例如：
      * <ul>
      *   <li>inList(["abc", "def", "123"], null) ==> -1</li>
@@ -309,6 +327,33 @@ public class Util {
                     || (t == null && list[i] == null)) {
                 return i;
             }
+        }
+
+        return -1;
+    }
+
+    /**
+     * 在数组中查找对应的元素，并返回索引，例如：
+     * <ul>
+     *   <li>inList(["abc", "def", "123"], null) ==> -1</li>
+     *   <li>inList(["abc", "def", "123", null], null) ==> 3</li>
+     *   <li>inList(["abc", "def", "123"], "xyz") ==> -1</li>
+     *   <li>inList(["abc", "def", "123"], "123") ==> 2</li>
+     * </ul>
+     *
+     * @param list 泛型对象实例列表
+     * @param t    泛型对象实例
+     * @param <T>  泛型对象类，类需要实现 equals 方法
+     * @return 在列表中返回数组下标，否则返回 -1, zero-base
+     */
+    public static <T> int search(Collection<T> list, T t) {
+        int index = 0;
+        for (T item : list) {
+            if (t != null && t.equals(item)
+                    || (t == null && item == null)) {
+                return index;
+            }
+            index++;
         }
 
         return -1;
@@ -352,6 +397,62 @@ public class Util {
      */
     public static boolean inList(int[] list, int value) {
         return search(list, value) != -1;
+    }
+
+    /**
+     * 判断列表中的数据是不是全部是value值，通过 equals 进行判断
+     * <p>
+     * 示例:
+     * <pre>{@code
+     *  all([null, null, null], null) => true
+     *  all([1, 2, 3, 4], 1) => false
+     *  all(["abc", "abc", "abc", "abc"], "abc") => true
+     * }</pre>
+     *
+     * @param list  对象集合
+     * @param value 目标值
+     * @param <T>   泛型
+     * @return 如果所有值均 equals Value，返回 true，否则返回失败
+     */
+    public static <T> boolean all(T[] list, T value) {
+        for (T t : list) {
+            if (t != null && !t.equals(value)) {
+                return false;
+            }
+
+            if (value != null && !value.equals(t)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 判断列表中的数据是不是全部是value值，通过 equals 进行判断
+     * <p>
+     * 示例:
+     * <pre>{@code
+     *  all([null, null, null], null) => true
+     *  all([1, 2, 3, 4], 1) => false
+     *  all(["abc", "abc", "abc", "abc"], "abc") => true
+     * }</pre>
+     *
+     * @param list  对象集合
+     * @param value 目标值
+     * @param <T>   泛型
+     * @return 如果所有值均 equals Value，返回 true，否则返回失败
+     */
+    public static <T> boolean all(Collection<T> list, T value) {
+        for (T t : list) {
+            if (t != null && !t.equals(value)) {
+                return false;
+            }
+
+            if (value != null && !value.equals(t)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -1963,16 +2064,17 @@ public class Util {
      * @param <T>       泛型对象
      * @return 返回拼接后的字符串
      */
-    public static <T> String join(List<T> list, String separator) {
+    public static <T> String join(Collection<T> list, String separator) {
         if (list == null || list.size() == 0) return "";
 
+        boolean first = true;
         StringBuilder sb = new StringBuilder(1000);
-        if (list.size() > 1) {
-            sb.append(toStr(list.get(0)));
-        }
-        for (int i = 1; i < list.size(); i++) {
-            sb.append(separator);
-            sb.append(toStr(list.get(i)));
+        for (T item : list) {
+            if (!first) {
+                sb.append(separator);
+            }
+            sb.append(toStr(item));
+            first = false;
         }
         return sb.toString();
     }
@@ -2942,7 +3044,7 @@ public class Util {
      * @param <T>  对象类型
      * @return 去重后的数据
      */
-    public static <T> List<T> unique(List<T> list) {
+    public static <T> List<T> unique(Collection<T> list) {
         if (list == null) return null;
 
         HashSet<T> set = new HashSet<>();
