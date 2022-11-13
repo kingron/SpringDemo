@@ -19,6 +19,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.InvalidParameterException;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -1544,6 +1545,8 @@ public class Util {
      * @return 转义后的字符串
      */
     public static String escapeRegexp(String str) {
+        // 如果输入字符串中有 \ ，需要替换为 \\，避免正则表达式处理错误
+        str = str.replace("\\", "\\\\");
         for (char ch : ".?![]{}()<>*+-=^$|".toCharArray()) {
             str = str.replace(String.valueOf(ch), "\\" + ch);
         }
@@ -1743,11 +1746,17 @@ public class Util {
      * @param filename 保存的文件名
      * @return 成功返回 true，失败返回 false
      */
-    public static boolean saveToFile(List<Object> list, String filename) {
+    public static boolean saveToFile(List<?> list, String filename) {
         try {
             FileWriter fileWriter = new FileWriter(filename);
+            boolean first = true;
             for (Object item : list) {
-                fileWriter.write(item + System.lineSeparator());
+                if (first) {
+                    fileWriter.write(toStr(item));
+                } else {
+                    fileWriter.write(System.lineSeparator() + toStr(item));
+                }
+                first = false;
             }
             fileWriter.close();
             return true;
@@ -1774,6 +1783,58 @@ public class Util {
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+
+    /**
+     * 保存多个对象到文件，Object必须实现了 Serializable 接口，保存的文件内容包含对象相关信息，而不是纯粹的字符串
+     *
+     * @param objects  Serializable对象
+     * @param filename 文件名
+     * @return 成功返回 true，失败返回 false
+     * @see #loadObject(String)
+     */
+    public static boolean saveObjects(String filename, Object... objects) {
+        try {
+            FileOutputStream stream = new FileOutputStream(filename);
+            ObjectOutputStream outputStream = new ObjectOutputStream(stream);
+            for (Object object : objects) {
+                outputStream.writeObject(object);
+            }
+            outputStream.close();
+            stream.close();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 从文件中读取多个对象
+     *
+     * @param filename 文件名
+     * @return 成功返回 true，失败返回 false
+     * @see #loadObject(String)
+     */
+    public static List<Object> loadObjects(String filename) {
+        List<Object> ret = new ArrayList<>();
+        Object obj;
+        try {
+            FileInputStream stream = new FileInputStream(filename);
+            ObjectInputStream inputStream = new ObjectInputStream(stream);
+
+            while (true) try {
+                obj = inputStream.readObject();
+                ret.add(obj);
+            } catch (EOFException e) {
+                break;
+            }
+            inputStream.close();
+            stream.close();
+            return ret;
+        } catch (Exception e) {
+            return ret;
         }
     }
 
@@ -3069,10 +3130,29 @@ public class Util {
         return (T) method.invoke(instance, params);
     }
 
-
     /**
-     * 史上最强 C 语言风格 scanf 函数
+     * 史上最强 C 语言风格 scanf 函数 <br/>
+     * The best and the powerful scanf function like C-Style ever.
+     *
      * <p>
+     * 使用示例: <pre>{@code
+     *   List<Object> out = new ArrayList<>();
+     *   if (scanf("%c %s %d %l abc", "A -123 -456 9876543210 def", out)) {
+     *      // 处理 out.get(0); out.get(1) ...
+     *   }
+     *   out.clear();
+     *   if (scanf("%c%c%c %s %d %f %g %G %l abcd", "AB中 123 456 7.89 -10.123 111.222 -9876543210 abcd", out)) {
+     *      // 处理 out.get(0); out.get(1);
+     *   }
+     *
+     *   if (scanf("%C %s%S %F %L ab中cd %o %O %x %x", "A xyz中文def\t\t 456 12345678 ab中cd 1234567 054321 1234 0x1a2b3c4d", out)) {
+     *      // 处理 out.get(0); out.get(1);
+     *   }
+     *
+     *   if (scanf("% . * / \\ %d", "% . * / \\ 123", out)) {
+     *      // 处理 out.get(0); out.get(1);
+     *   }
+     * }</pre>
      * 支持的格式
      * <ul>
      *     <li>%c: 任意字符，除换行符外</li>
@@ -3085,21 +3165,24 @@ public class Util {
      *     <li>%G: 双精度整数 double</li>
      *     <li>%l: 长整型，可支持正负</li>
      *     <li>%L: 长整型正整数</li>
-     *     <li>%s: 字符串</li>
-     *     <li>%S: 非空白字符串</li>
-     *     <li>%o: 可选前导0八进制数值</li>
-     *     <li>%O: 前导0八进制数值</li>
-     *     <li>%x: 可选前导0x十六进制数值</li>
-     *     <li>%X: 前导0x十六进制数值</li>
+     *     <li>%s: 非空白字符串</li>
+     *     <li>%S: 空白字符串，如制表符，空格，回车，换行等</li>
+     *     <li>%o: 可选前导0八进制数值，返回数据为long</li>
+     *     <li>%O: 前导0八进制数值，返回数据为long</li>
+     *     <li>%x: 可选前导0x十六进制数值，返回数据为long</li>
+     *     <li>%X: 前导0x十六进制数值，返回数据为long</li>
      * </ul>
      *
      * @param format 格式字符串
      * @param source 源字符串
-     * @param out    输出结果列表，与占位符一一对应
+     * @param out    输出结果列表，与占位符一一对应，list必须为空队列
      * @return 成功匹配并解释数据返回 true，否则返回 false，数据解释错误抛异常
      */
     public static boolean scanf(String format, String source, List<Object> out) {
-        assert out != null;
+        if (out == null || out.size() > 0) {
+            throw new InvalidParameterException("Out can't be null and must be empty");
+        }
+
         List<Character> fmt = new ArrayList<>();
         for (int i = 1; i < format.length(); i++) {
             if (format.charAt(i - 1) != '%') continue;

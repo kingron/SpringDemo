@@ -90,6 +90,13 @@ public class UtilTest {
         assertTrue(equal(-100L, minValue(200.0, -50, 100, -100)));
         assertTrue(equal(200, maxValue(200.0, -50, 100, -100)));
 
+        List<String> saveList = new ArrayList<>();
+        saveList.add("line1");
+        saveList.add("line2");
+        assertTrue(saveToFile(saveList, filename));
+        String tmp = readFile(filename, "utf-8");
+        assertEquals("line1" + System.lineSeparator() + "line2", tmp);
+
         // 这里演示如何使用 JMock 来 mock 需要的类方法
         MockUp<BigDecimal> mock = new MockUp<BigDecimal>() {
             @Mock
@@ -107,18 +114,66 @@ public class UtilTest {
     }
 
     @Test
+    public void testSaveLoadObject() {
+        Long x = Long.valueOf(1234);
+        List<String> list = new ArrayList<>();
+        list.add("line1");
+        list.add("line2");
+        Map<String, String> map = new HashMap<>();
+        map.put("key", "value");
+
+        String filename = getTempFilename("tmp", ".obj");
+        saveObjects(filename, x, list, map);
+        List<Object> ret = loadObjects(filename);
+        assertEquals(x, ret.get(0));
+        assertEquals(list, ret.get(1));
+        assertEquals(map, ret.get(2));
+
+        saveObject(x, filename);
+        Long loadX = loadObject(filename);
+        assertEquals(x, loadX);
+    }
+
+    @Test
     public void testScanf() {
         List<Object> out = new ArrayList<>();
-        scanf("%c %s %d %l abc", "A -123 -456 9876543210 abc", out);
-        System.out.println(join(out, ","));
+        assertFalse(scanf("%c %s %d %l abc", "A -123 -456 9876543210 def", out));
 
         out.clear();
-        scanf("%c %s %d %f %g %l abcd", "A -123 456 7.89 10.123 9876543210 abcd", out);
-        System.out.println(join(out, ","));
+        assertTrue(scanf("%c %s %d %l abc", "A -123 -456 9876543210 abc", out));
+        assertEquals('A', out.get(0));
+        assertEquals("-123", out.get(1));
+        assertEquals(-456, out.get(2));
+        assertEquals(9876543210L, out.get(3));
 
         out.clear();
-        scanf("%c %s %d %f %g %l % abcd %O %x %x", "A -123 456 7.89 10.123 9876543210 % abcd 01234567 0x1234 0x1a2b3c4d", out);
+        scanf("%c%c%c %s %D %f %g %G %l abcd", "AB中 123 456 7.89 -10.123 111.222 -9876543210 abcd", out);
         System.out.println(join(out, ","));
+        assertEquals('A', out.get(0));
+        assertEquals('B', out.get(1));
+        assertEquals('中', out.get(2));
+        assertEquals("123", out.get(3));
+        assertEquals(456, out.get(4));
+        assertEquals(7.89f, out.get(5));
+        assertEquals(-10.123, out.get(6));
+        assertEquals(111.222, out.get(7));
+        assertEquals(-9876543210L, out.get(8));
+
+        out.clear();
+        scanf("%C %s%S %F %L ab中cd %o %O %x %X", "A xyz中文def\t\t 456 12345678 ab中cd 1234567 054321 1234 0x1a2b3c4d", out);
+        assertEquals('A', out.get(0));
+        assertEquals("xyz中文def", out.get(1));
+        assertEquals("\t\t", out.get(2));
+        assertEquals(456f, out.get(3));
+        assertEquals(12345678L, out.get(4));
+        assertEquals(01234567L, out.get(5));
+        assertEquals(054321L, out.get(6));
+        assertEquals(0x1234L, out.get(7));
+        assertEquals(0x1a2b3c4dL, out.get(8));
+
+        out.clear();
+        scanf("% . * / \\ %d", "% . * / \\ 123", out);
+        assertEquals(123, out.get(0));
     }
 
     @Test
