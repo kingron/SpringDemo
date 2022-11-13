@@ -420,6 +420,18 @@ public class UtilTest {
     }
 
     @Test
+    public void testMask() {
+        assertEquals("", mask("", 3, 4));
+        assertEquals("139****5678", mask("13912345678", 3, 4));
+        assertEquals("13912345678", mask("13912345678", 11, 4));
+        assertEquals("13912345678", mask("13912345678", -1, 4));
+        assertEquals("****2345678", mask("13912345678", 0, 4));
+        assertEquals("139123456**", mask("13912345678", 9, 4));
+        assertEquals("13912******", mask("13912345678", 5, 11));
+        assertEquals("***********", mask("13912345678", 0, 11));
+    }
+
+    @Test
     public void testEqualString() {
         assertTrue(equal(null, null));
         assertTrue(equal("", ""));

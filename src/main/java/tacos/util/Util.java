@@ -3845,4 +3845,83 @@ public class Util {
         }
     }
 
+    /**
+     * 判断是否是字母
+     *
+     * @param c 字符
+     * @return 是字母返回 true，否则返回 false
+     */
+    public static boolean isAlpha(char c) {
+        return ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'));
+    }
+
+    /**
+     * Indicates whether the given character is in the {@code DIGIT} set.
+     *
+     * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
+     */
+    public static boolean isDigit(char c) {
+        return c >= '0' && c <= '9';
+    }
+
+    /**
+     * Converts char array into byte array by stripping the high byte of each character.
+     */
+    public static byte[] toByteArray(char[] carr) {
+        byte[] barr = new byte[carr.length];
+        for (int i = 0; i < carr.length; i++) {
+            barr[i] = (byte) carr[i];
+        }
+        return barr;
+    }
+
+    /**
+     * Converts byte array to char array by simply extending bytes to chars.
+     */
+    public static char[] toCharArray(byte[] barr) {
+        char[] carr = new char[barr.length];
+        for (int i = 0; i < barr.length; i++) {
+            carr[i] = (char) (barr[i] & 0xFF);
+        }
+        return carr;
+    }
+
+    /**
+     * 字符串省略截取
+     * 字符串截取到指定长度size+...的形式
+     *
+     * @param subject 需要处理的字符串
+     * @param size    截取的长度
+     * @return 处理后的字符串
+     */
+    public static String ellipse(String subject, int size) {
+        if (subject != null && subject.length() > size) {
+            subject = subject.substring(0, size) + "...";
+        }
+        return subject;
+    }
+
+    /**
+     * 对字符串进行脱敏处理，例如 13912345678 => 139****5679
+     *
+     * @param source 源字符串
+     * @param start  起始位置
+     * @param len    遮罩长度
+     * @return 脱敏后的字符串
+     */
+    public static String mask(String source, int start, int len) {
+        if (isEmpty(source)) {
+            return "";
+        }
+
+        if (start < 0 || start >= source.length()) {
+            return source;
+        }
+
+        int left = source.length() - start;
+        if (left < len) len = left;
+        return source.substring(0, start)
+                + "*".repeat(len) + source.substring(start + len);
+
+    }
 }
