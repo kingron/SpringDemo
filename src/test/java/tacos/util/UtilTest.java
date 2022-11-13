@@ -18,7 +18,7 @@ import static tacos.util.Util.*;
 public class UtilTest {
 
     @Test
-    public void testDummy() throws IOException {
+    public void testDummy() throws Exception {
         System.out.println("每周有 " + MS_WEEK + " ms");
         System.out.println("当前时间: " + format(now(), FORMAT_SHORT_TIME));
         Properties ret = loadProperties("not exist");
@@ -31,9 +31,6 @@ public class UtilTest {
         System.out.println(getFilename(".tmp"));
         System.out.println(currentTime());
         assertEquals(12, getDay(date(2022, 10, 12)));
-        Object[] obj = scanf("%d %d %d %f", "1 2 3 4.5");
-        assertEquals(1, obj[0]);
-        assertEquals(4.5, obj[3]);
 
         Map<String, Integer> map = new HashMap<>();
         map.put("key", 123);
@@ -80,6 +77,8 @@ public class UtilTest {
         assertTrue(isIPv4Address("192.168.1.1"));
         assertFalse(isIPv4Address("256.190.1.1"));
 
+        assertEquals("贰角叁分", toChinese(".23"));
+        assertEquals("壹佰贰拾叁元", toChinese("123"));
         assertEquals("壹元贰角叁分", toChinese("1.23"));
         assertEquals("壹仟贰佰叁拾肆万伍仟陆佰柒拾捌亿玖仟零壹拾贰万叁仟肆佰伍拾陆元壹角贰分叁厘", toChinese("1234567890123456.123"));
         assertEquals("柒分玖厘", toChinese("0.0798"));
@@ -99,6 +98,27 @@ public class UtilTest {
             }
         };
         assertEquals("1", divide("123333", "123"));
+
+        benchmark(() -> {
+            testDigest();
+            return null;
+        });
+        invoke(mock, "divide", new Class[]{BigDecimal.class}, new BigDecimal("1"));
+    }
+
+    @Test
+    public void testScanf() {
+        List<Object> out = new ArrayList<>();
+        scanf("%c %s %d %l abc", "A -123 -456 9876543210 abc", out);
+        System.out.println(join(out, ","));
+
+        out.clear();
+        scanf("%c %s %d %f %g %l abcd", "A -123 456 7.89 10.123 9876543210 abcd", out);
+        System.out.println(join(out, ","));
+
+        out.clear();
+        scanf("%c %s %d %f %g %l % abcd %O %x %x", "A -123 456 7.89 10.123 9876543210 % abcd 01234567 0x1234 0x1a2b3c4d", out);
+        System.out.println(join(out, ","));
     }
 
     @Test

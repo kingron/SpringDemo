@@ -1625,226 +1625,6 @@ public class Util {
         return isValidDate(year, month, day, hour, minute, second, 0);
     }
 
-    private static boolean accept(char t, char c, int i) {
-        if (t == 'd')
-            return "0123456789".indexOf(c) >= 0 || i == 0 && c == '-';
-        else if (t == 'f')
-            return "-0123456789.+Ee".indexOf(c) >= 0;
-        else if (t == 's')
-            return Character.isLetterOrDigit(c);
-        throw new RuntimeException("Unknown format code: " + t);
-    }
-
-    /**
-     * C 语言风格 scanf，只支持 %d %f
-     *
-     * @param fmt 格式字符串
-     * @param str 要提取的字符串
-     * @return 对象列表，和占位符顺序一一匹配
-     */
-    public static Object[] scanf(String fmt, String str) {
-        List<Object> ans = new ArrayList<>();
-        int s = 0;
-        int ns = str.length();
-        int n = fmt.length();
-        for (int i = 0; i < n; i++) {
-            char c = fmt.charAt(i);
-            if (c == '%') {
-                char t = fmt.charAt(++i);
-                if (t == '%')
-                    c = t;
-                else {
-                    int s0 = s;
-                    while ((s == s0 || s < ns) && accept(t, str.charAt(s), s - s0))
-                        s++;
-                    String sub = str.substring(s0, s);
-                    if (t == 'd')
-                        ans.add(Integer.valueOf(sub));
-                    else if (t == 'f')
-                        ans.add(Double.valueOf(sub));
-                    else
-                        ans.add(sub);
-                    continue;
-                }
-            }
-            if (str.charAt(s++) != c)
-                throw new RuntimeException();
-        }
-        if (s < ns)
-            throw new RuntimeException("Unmatched characters at end of string");
-        return ans.toArray();
-    }
-
-    /**
-     * C 语言风格的 sscanf 函数，支持以下格式: %s %d %f %l %g %c，同时支持宽度指定
-     *
-     * @param input  输入字符串
-     * @param format 格式字符串
-     * @param result 输出的集合对象，按给定的占位符顺序一一匹配返回
-     * @return 成功解释返回 true，否则返回 false
-     */
-    public static boolean sscanf(String input, String format, @SuppressWarnings("rawtypes") Collection result) {
-        if (format.indexOf('%') < 0) {
-            return false;
-        }
-        // 分解格式
-        List<String> subFormats = new ArrayList<>();
-        if (!resolveFormatString(subFormats, format)) {
-            return false;
-        }
-        // 解析输入
-        return resolveInputString(subFormats, result, input);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static boolean resolveInputString(List<String> subFormats,
-                                              @SuppressWarnings("rawtypes") Collection export,
-                                              String input) {
-        StringWriter writer = null;
-        for (int formatIndex = 0, inputIndex = 0; formatIndex < subFormats.size(); ++formatIndex) {
-            String subFormat = subFormats.get(formatIndex);
-            if ("%d".equals(subFormat) || "%l".equals(subFormat)) {
-                for (; inputIndex < input.length(); ++inputIndex) {
-                    char c = input.charAt(inputIndex);
-                    if ('9' < c || '0' > c) {
-                        if (writer != null) {
-                            break;
-                        }
-                    } else {
-                        if (writer == null) {
-                            writer = new StringWriter(input.length());
-                        }
-                        writer.append(c);
-                    }
-                }
-                long integer = Long.parseLong(toStr(writer));
-                writer = null;
-                export.add(integer);
-            } else if ("%f".equals(subFormat)) {
-                int dotCount = 0;
-                for (; inputIndex < input.length(); ++inputIndex) {
-                    char c = input.charAt(inputIndex);
-                    if (c == '.') {
-                        ++dotCount;
-                    }
-                    if (dotCount > 1) {
-                        break;
-                    }
-                    if (('9' < c || '0' > c) && '.' != c) {
-                        if (writer != null) {
-                            break;
-                        }
-                    } else {
-                        if (writer == null) {
-                            writer = new StringWriter(input.length());
-                        }
-                        writer.append(c);
-                    }
-                }
-                double integer = Double.parseDouble(toStr(writer));
-                writer = null;
-                export.add(integer);
-            } else if ("%c".equals(subFormat)) {
-                char c = input.charAt(inputIndex);
-                export.add(c);
-                ++inputIndex;
-            } else if ("%s".equals(subFormat)) {
-                if (formatIndex >= subFormats.size() - 1) {
-                    export.add(input.substring(inputIndex));
-                    inputIndex = input.length();
-                    continue;
-                }
-                String subFormat2 = subFormats.get(formatIndex + 1);
-                if ("%d".equals(subFormat2) || "%l".equals(subFormat2)) {
-                    for (; inputIndex < input.length(); ++inputIndex) {
-                        char c = input.charAt(inputIndex);
-                        if (writer == null) {
-                            writer = new StringWriter(input.length());
-                        }
-                        if ('9' < c || '0' > c) {
-                            writer.append(c);
-                        } else {
-                            break;
-                        }
-                    }
-                    export.add(toStr(writer));
-                    writer = null;
-                } else if ("%f".equals(subFormat2)) {
-                    for (; inputIndex < input.length(); ++inputIndex) {
-                        char c = input.charAt(inputIndex);
-                        if (writer == null) {
-                            writer = new StringWriter(input.length());
-                        }
-                        if (('9' < c || '0' > c) && '.' != c) {
-                            writer.append(c);
-                        } else {
-                            break;
-                        }
-                    }
-                    export.add(toStr(writer));
-                    writer = null;
-                } else if ("%s".equals(subFormat2) || "%c".equals(subFormat2)) {
-                    return false;
-                } else {
-                    int nextInputIndex = input.indexOf(subFormat2, inputIndex);
-                    String skipString = input.substring(inputIndex, nextInputIndex);
-                    inputIndex = nextInputIndex + subFormat2.length();
-                    export.add(skipString);
-                    ++formatIndex;
-                }
-            } else {
-                inputIndex = input.indexOf(subFormat, inputIndex) + subFormat.length();
-            }
-        }
-        return true;
-    }
-
-    private static boolean resolveFormatString(List<String> subFormats, String format) {
-        assert subFormats != null;
-
-        // 分解格式
-        StringWriter writer = null;
-        for (int index = 0; index < format.length(); ++index) {
-            char c = format.charAt(index);
-            // 普通字符
-            if (c != '%') {
-                if (writer != null) {
-                    subFormats.add(writer.toString());
-                }
-                writer = new StringWriter(format.length());
-                writer.append(c);
-                continue;
-            }
-            // 结束判定
-            if (index == format.length() - 1) {
-                if (writer != null) writer.append(c);
-                break;
-            }
-            // 下一个字符
-            ++index;
-            char c2 = format.charAt(index);
-            // 发现%
-            if (c2 == '%') {
-                if (writer != null) writer.append(c);
-                continue;
-            }
-            // 格式判定
-            if ("dflsc".indexOf(c2) < 0) {
-                return false;
-            }
-            if (writer != null) {
-                subFormats.add(writer.toString());
-            }
-            writer = new StringWriter(format.length());
-            writer.append(c);
-            writer.append(c2);
-        }
-        if (writer != null) {
-            subFormats.add(writer.toString());
-        }
-        return true;
-    }
-
     /**
      * 返回当前带毫秒的时间字符串，不带日期
      *
@@ -3075,67 +2855,6 @@ public class Util {
         }
     }
 
-//    /**
-//     * C 语言风格 scanf 函数
-//     * <p>
-//     * 支持的格式串:
-//     * <ul>
-//     *     <li>%c: 字符，支持域，例如 %2c 表示读取两个字符</li>
-//     *     <li>%d: 正负整数</li>
-//     *     <li>%u: 正整数</li>
-//     *     <li>%f: 单精度浮点数</li>
-//     *     <li>%g: 双精度浮点数</li>
-//     *     <li>%l: 长整型</li>
-//     *     <li>%x: 十六进制整数</li>
-//     *     <li>%s: 字符串</li>
-//     *     <li>%o: 八进制整数</li>
-//     * </ul>
-//     *
-//     * @param format 格式串
-//     * @param value  要处理的字符串
-//     * @param result 返回的结果列表，不能为空
-//     * @return 成功返回 true，失败返回 false
-//     */
-/*    public static boolean scanf(String format, String value, List<Object> result) {
-        assert result != null : "result 不应该为空";
-
-        // 对格式中的特殊字符转义
-        String reg = escapeRegexp(format);
-
-        // 扫描所有的占位符，存储到列表，用于后面的正则表达式替换
-        List<String> placeHolder = new ArrayList<>();
-        // 存储扫描到的格式类型，如 c, s, l, g, f, x, s, o, u
-        List<Character> types = new ArrayList<>();
-        char ch;
-        for (int i = 0; i < format.length() - 1; i++) {
-            ch = format.charAt(i);
-            if (ch != '%') continue;
-        }
-
-        // TODO 2022/11/6 - Kingron: 未完成
-        for (String s : placeHolder) {
-            if ("%f".equals(s)) {
-                // 替换为正则表达式
-                reg = reg.replaceFirst("%f", "(^-?[1-9]\\d*\\.\\d+$|^-?0\\.\\d+$|^-?[1-9]\\d*$|^0$)");
-            } else if ("%d".equals(s)) {
-                reg = reg.replaceFirst("%d", "(\\d+)");
-            }
-        }
-
-        // 开始正则表达式处理
-        Pattern pattern = Pattern.compile(reg);
-        Matcher matcher = pattern.matcher(value);
-        if (!matcher.matches()) return false;
-
-        // 处理返回结果
-        for (int i = 0; i < matcher.groupCount(); i++) {
-            result.add(matcher.group(i + 1));
-        }
-
-        return true;
-    }
-*/
-
     /**
      * 对数组中的元素去重
      *
@@ -3280,7 +2999,7 @@ public class Util {
      * @param fieldName 变量的名字
      * @return 返回实例的给定的fieldName变量的值，出错返回 null
      */
-    public <T> T getField(Object instance, String fieldName) {
+    public static <T> T getField(Object instance, String fieldName) {
         try {
             Field field = instance.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
@@ -3298,7 +3017,7 @@ public class Util {
      * @param object    要给变量赋值的新值
      * @return 成功设置返回 true，否则返回 false
      */
-    public boolean setField(Object instance, String fieldName, Object object) {
+    public static boolean setField(Object instance, String fieldName, Object object) {
         try {
             Field field = object.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
@@ -3316,7 +3035,7 @@ public class Util {
      * @param methodName 方法名称
      * @return 返回对象的类方法属性，失败返回 null
      */
-    public Method getMethod(Object instance, String methodName, Class<?>... params) {
+    public static Method getMethod(Object instance, String methodName, Class<?>... params) {
         try {
             Method method = instance.getClass().getDeclaredMethod(methodName, params);
             method.setAccessible(true);
@@ -3342,12 +3061,117 @@ public class Util {
      * @throws InvocationTargetException 异常
      * @throws IllegalAccessException    异常
      */
-    public <T> T invoke(Object instance, String methodName, Class<?>[] clazz, Object... params) throws
+    public static <T> T invoke(Object instance, String methodName, Class<?>[] clazz, Object... params) throws
             NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Method method = instance.getClass().getDeclaredMethod(methodName, clazz);
         method.setAccessible(true);
 
         return (T) method.invoke(instance, params);
+    }
+
+
+    /**
+     * 史上最强 C 语言风格 scanf 函数
+     * <p>
+     * 支持的格式
+     * <ul>
+     *     <li>%c: 任意字符，除换行符外</li>
+     *     <li>%C: 字母、数字、下划线</li>
+     *     <li>%d: 正负整数，支持 + - 符号</li>
+     *     <li>%D: 正整数</li>
+     *     <li>%f: 正负浮点数</li>
+     *     <li>%F: 正浮点数</li>
+     *     <li>%g: 双精度 double，可支持正负</li>
+     *     <li>%G: 双精度整数 double</li>
+     *     <li>%l: 长整型，可支持正负</li>
+     *     <li>%L: 长整型正整数</li>
+     *     <li>%s: 字符串</li>
+     *     <li>%S: 非空白字符串</li>
+     *     <li>%o: 可选前导0八进制数值</li>
+     *     <li>%O: 前导0八进制数值</li>
+     *     <li>%x: 可选前导0x十六进制数值</li>
+     *     <li>%X: 前导0x十六进制数值</li>
+     * </ul>
+     *
+     * @param format 格式字符串
+     * @param source 源字符串
+     * @param out    输出结果列表，与占位符一一对应
+     * @return 成功匹配并解释数据返回 true，否则返回 false，数据解释错误抛异常
+     */
+    public static boolean scanf(String format, String source, List<Object> out) {
+        assert out != null;
+        List<Character> fmt = new ArrayList<>();
+        for (int i = 1; i < format.length(); i++) {
+            if (format.charAt(i - 1) != '%') continue;
+            char ch = format.charAt(i);
+            if ("cdfglsoxCDFGLSOX".indexOf(ch) == -1) continue;
+
+            fmt.add(ch);
+        }
+
+        String s = escapeRegexp(format);
+        for (char c : fmt) {
+            if (c == 'c') { // 任意字符，除换行符外
+                s = s.replaceFirst("%c", "(.)");
+            } else if (c == 'C') { // 字母数字下划线
+                s = s.replaceFirst("%C", "(\\\\w+)");
+            } else if (c == 'd') { // 正负整数
+                s = s.replaceFirst("%d", "([+-]?\\\\d+)");
+            } else if (c == 'D') { // 正整数
+                s = s.replaceFirst("%D", "(\\\\d+)");
+            } else if (c == 'f') { // 浮点数，带符号
+                s = s.replaceFirst("%f", "([-+]?\\\\d+(?:\\\\.\\\\d+)?)");
+            } else if (c == 'F') { // 正浮点数
+                s = s.replaceFirst("%F", "(\\\\d+(?:\\\\.\\\\d+)?)");
+            } else if (c == 'g') { // 双精度浮点数，支持正负
+                s = s.replaceFirst("%g", "([-+]?\\\\d+(?:\\\\.\\\\d+)?)");
+            } else if (c == 'G') { // 双精度正数
+                s = s.replaceFirst("%G", "(\\\\d+(?:\\\\.\\\\d+)?)");
+            } else if (c == 'l') { // 正负长整形
+                s = s.replaceFirst("%l", "([+-]?\\\\d+)");
+            } else if (c == 'L') { // 长整型正数
+                s = s.replaceFirst("%L", "(\\\\d+)");
+            } else if (c == 's') { // 非空白符
+                s = s.replaceFirst("%s", "(\\\\S+)");
+            } else if (c == 'S') { // 匹配空白符
+                s = s.replaceFirst("%S", "(\\\\s+)");
+            } else if (c == 'o') { // 可选带 0 前缀八进制
+                s = s.replaceFirst("%o", "([0-7]*)");
+            } else if (c == 'O') { // 必带 0 前缀八进制
+                s = s.replaceFirst("%O", "(0[0-7]*)");
+            } else if (c == 'x') { // 可选带 0x 前缀十六进制
+                s = s.replaceFirst("%x", "(0[xX]?[0-9A-Fa-f]+|[0-9A-Fa-f]+)");
+            } else if (c == 'X') { // 必带 0x 前缀十六进制
+                s = s.replaceFirst("%X", "(0[xX]?[0-9A-Fa-f]+)");
+            }
+        }
+        Pattern pattern = Pattern.compile(s);
+        Matcher matcher = pattern.matcher(source);
+        if (!matcher.matches()) return false;
+
+        for (int i = 0; i < matcher.groupCount(); i++) {
+            char c = fmt.get(i);
+            String value = matcher.group(i + 1);
+            if (c == 'c' || c == 'C') { // 字符
+                out.add(value.charAt(0));
+            } else if (c == 'd' || c == 'D') { // 整数
+                out.add(Integer.valueOf(value));
+            } else if (c == 'f' || c == 'F') { // 浮点数
+                out.add(Float.valueOf(value));
+            } else if (c == 'g' || c == 'G') { // 双精度浮点数
+                out.add(Double.valueOf(value));
+            } else if (c == 'l' || c == 'L') { // 长整形
+                out.add(Long.valueOf(value));
+            } else if (c == 's' || c == 'S') { // 字符串
+                out.add(value);
+            } else if (c == 'o' || c == 'O') { // 八进制
+                out.add(Long.parseLong(value, 8));
+            } else if (c == 'x' || c == 'X') { // 十六进制
+                value = value.replace("0x", "").replace("0X", "");
+                out.add(Long.parseLong(value, 16));
+            }
+        }
+        return true;
     }
 
     /**
