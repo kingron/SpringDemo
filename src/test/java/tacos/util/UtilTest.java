@@ -22,6 +22,7 @@ public class UtilTest {
         System.out.println("每周有 " + MS_WEEK + " ms");
         System.out.println("当前时间: " + format(now(), FORMAT_SHORT_TIME));
         Properties ret = loadProperties("not exist");
+        ret = loadProperties("src/main/resources/application.properties");
         assertEquals(0, ret.size());
         assertFalse(isFloat("0.2.5"));
         assertFalse(isFloat("0.2ab"));
@@ -783,6 +784,8 @@ public class UtilTest {
         assertTrue(isValidID("340202710410689"));
 
         assertFalse(isValidID("390202710410689"));
+        assertFalse(isValidID("39020271041068"));
+        assertFalse(isValidID("a39020271041068"));
         assertFalse(isValidID("340202197104106892"));
     }
 

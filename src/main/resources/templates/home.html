@@ -3,10 +3,22 @@
       xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Taco Cloud</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/util.js"></script>
 </head>
 <body>
 <h1 th:text="${'Welcome ' + name}"></h1>
-<p th:text="${name}">placeholder message</p>
+<div><p th:text="${name}">placeholder message</p><button>Click !</button></div>
 <img th:src="@{/images/TacoCloud.png}"/>
+<table>
+    <thead><tr><td>Date</td><td>Name</td><td>备注</td></tr></thead>
+    <tbody>
+    <tr><td>2022-10-20</td><td>Bill Gates</td><td>Microsoft's CEO</td></tr>
+    <tr><td>2022-10-20</td><td>Bill Gates</td><td>Microsoft's CEO</td></tr>
+    <tr><td>2022-10-21</td><td class="good">Elon Musk</td><td>Twitter's CEO</td></tr>
+    <tr><td>2022-10-21</td><td>Elon Musk</td><td class="warn">Twitter's CEO</td></tr>
+    </tbody>
+    <tfoot></tfoot>
+</table>
 </body>
 </html>
