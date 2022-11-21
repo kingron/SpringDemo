@@ -1,15 +1,29 @@
 /**
     个人默认css
 */
++ .highlight {
+    box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+    -webkit-box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+    -moz-box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+}
+
 div {
     display: flex;
     align-items: center;
+    text-align: center;
+    vertical-align: middle;
 }
 
 img {
     object-fit: cover;
     border-radius: 5px;
     border: 1px solid #ccc;
+}
+
+img:hover {
+    box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+    -webkit-box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+    -moz-box-shadow: 0 0 5px rgba(81, 203, 238, 1);
 }
 
 /* 表格默认效果 */
@@ -42,12 +56,28 @@ td {
 }
 
 td:hover {
-    background: cyan;
+    box-shadow: 0 0 5px rgba(81, 203, 238, 1);
 }
 
 /* 表格行鼠标悬浮效果 */
 tr:hover {
-    background: #b8d1f3;
+    box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+    -webkit-box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+    -moz-box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+}
+
+button {
+    min-height: 40px;
+    min-width: 80px;
+    border-radius: 8px;
+    border: 0;
+}
+
+button:hover {
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+    -webkit-box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+    -moz-box-shadow: 0 0 5px rgba(81, 203, 238, 1);
 }
 
 /* 页面绝对居中 */
