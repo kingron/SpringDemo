@@ -16,7 +16,6 @@ import javax.sql.DataSource;
 /**
  * Automatically init the database and data if needed
  *
- * @author lrr670
  * @since 1.0
  */
 @Configuration

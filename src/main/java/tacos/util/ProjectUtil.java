@@ -16,7 +16,6 @@ import static tacos.util.Util.strToInt;
  * <p>
  * 项目专用工具类，无法公开其他项目使用，或者是项目特定依赖包相关的工具类
  *
- * @author lrr670
  * @version 1.0
  * @since 11/3/2022
  */

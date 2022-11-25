@@ -2472,6 +2472,25 @@ public class Util {
     }
 
     /**
+     * 返回尾部一定有分隔符的路径
+     *
+     * @param path 待处理的路径，可以包含或者不包含尾部的路径分隔符
+     * @return 包含尾部分隔符的路径
+     */
+    public static String pathEndWithSeperator(String path) {
+        if (path == null) {
+            return null;
+        }
+
+        String s = right(path, 1);
+        if (s == File.separator || s.equals("/") || s.equals("\\")) {
+            return path;
+        }
+
+        return path + File.separator;
+    }
+
+    /**
      * 从流中读取所有内容，并返回String
      *
      * @param in 待读取的流
@@ -3925,16 +3944,21 @@ public class Util {
 
     }
 
+    /**
+     * 返回 App 所在的路径，支持磁盘文件，或者JAR包
+     *
+     * @return 程序所在的路径
+     */
     public static String getAppPath() {
         /** * 方法一：获取当前可执行jar包所在目录 */
         String filePath = System.getProperty("java.class.path");
         String pathSplit = System.getProperty("path.separator");//得到当前操作系统的分隔符，windows下是";",linux下是":"
 
-        // 若没有其他依赖，则filePath的结果应当是该可运行jar包的绝对路径， * 此时我们只需要经过字符串解析，便可得到jar所在目录
+        // 若没有其他依赖，则filePath的结果应当是该可运行jar包的绝对路径
+        // 此时我们只需要经过字符串解析，便可得到jar所在目录
         if (filePath.contains(pathSplit)) {
             filePath = filePath.substring(0, filePath.indexOf(pathSplit));
         } else if (filePath.endsWith(".jar")) {
-
             //截取路径中的jar包名,可执行jar包运行的结果里包含".jar"
             filePath = filePath.substring(0, filePath.lastIndexOf(File.separator) + 1);
         }

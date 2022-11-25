@@ -885,6 +885,15 @@ public class UtilTest {
     }
 
     @Test
+    public void testPathEndWithSeperator() {
+        assertEquals(null, pathEndWithSeperator(null));
+        assertEquals("C:" + File.separator, pathEndWithSeperator("C:"));
+        assertEquals("C:\\TOOLS" + File.separator, pathEndWithSeperator("C:\\TOOLS"));
+        assertEquals("D:\\TEMP" + File.separator, pathEndWithSeperator("D:\\TEMP\\"));
+        assertEquals("/c/a/b" + File.separator, pathEndWithSeperator("/c/a/b\\"));
+    }
+
+    @Test
     public void testGetUptime() {
         assertEquals("1 天", getUptime(86400));
         assertEquals("1 天 1 秒", getUptime(86401));
