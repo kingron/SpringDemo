@@ -1,0 +1,158 @@
+[
+  {
+    "name": "0 step",
+    "selectorType": "xpath",
+    "selectorValue": "/html/body/div/div/div[1]/div/div[3]/div/div/label",
+    "action": "check",
+    "actionValue": "Search",
+    "measure": 1,
+    "marker": "none",
+    "stopOnError": true,
+    "timeout": 10
+  },
+  {
+    "name": "1 click",
+    "selectorType": "xpath",
+    "selectorValue": "/html/body/div/div/div[1]/div/div[1]/div[1]/div",
+    "action": "click",
+    "marker": "none",
+    "actionValue": "",
+    "measure": 1,
+    "stopOnError": false,
+    "timeout": 15
+  },
+  {
+    "name": "2 gap for click history",
+    "selectorType": "xpath",
+    "selectorValue": "",
+    "action": "sleep",
+    "marker": "none",
+    "actionValue": "100",
+    "measure": 1,
+    "stopOnError": false,
+    "timeout": 1
+  },
+  {
+    "name": "3 select value",
+    "selectorType": "xpath",
+    "selectorValue": "/html/body/div[2]/div[3]/ul",
+    "action": "select",
+    "marker": "none",
+    "actionValue": "@VALUE",
+    "measure": 1,
+    "stopOnError": false,
+    "timeout": 20
+  },
+  {
+    "name": "4 input no",
+    "selectorType": "xpath",
+    "selectorValue": "/html/body/div/div/div[1]/div/div[3]/div/div/div/input",
+    "action": "fill",
+    "marker": "none",
+    "actionValue": "@NO",
+    "measure": 1,
+    "stopOnError": true,
+    "timeout": 20
+  },
+  {
+    "name": "5 click go button",
+    "selectorType": "xpath",
+    "selectorValue": "/html/body/div/div/div[1]/div/div[3]/div/button",
+    "action": "click",
+    "marker": "none",
+    "actionValue": "",
+    "measure": 1,
+    "stopOnError": true,
+    "timeout": 10
+  },
+  {
+    "name": "6 click yes button",
+    "selectorType": "xpath",
+    "selectorValue": "/html/body/div[2]/div[3]/div/div[3]/button[1]",
+    "action": "click",
+    "marker": "none",
+    "actionValue": "",
+    "measure": 1,
+    "stopOnError": true,
+    "timeout": 15
+  },
+  {
+    "name": "7 click others",
+    "selectorType": "xpath",
+    "selectorValue": "/html/body/div[2]/div[3]/div/div[2]/div[1]/div[1]/fieldset/div/label[7]/span[2]",
+    "action": "click",
+    "marker": "none",
+    "actionValue": "",
+    "measure": 1,
+    "stopOnError": true,
+    "timeout": 15
+  },
+  {
+    "name": "8 fill reason",
+    "selectorType": "id",
+    "selectorValue": "outlined-textarea",
+    "action": "fill",
+    "marker": "none",
+    "actionValue": "@FILL",
+    "measure": 1,
+    "stopOnError": true,
+    "timeout": 15
+  },
+  {
+    "name": "9 click save button",
+    "selectorType": "xpath",
+    "selectorValue": "/html/body/div[2]/div[3]/div/div[3]/button[1]",
+    "action": "click",
+    "marker": "start",
+    "actionValue": "",
+    "measure": 1,
+    "stopOnError": true,
+    "capture": true,
+    "timeout": 15
+  },
+  {
+    "name": "10 check all panel",
+    "selectorType": "xpath",
+    "selectorValue": "/html/body/div/div/div[2]/div[2]/div[2]/div/div/div[1]/div/div[1]/div/div/div[2]/div/div/div/div/div/div/div/div/div/div/table/tbody/tr[2]/td[1],/html/body/div/div/div[2]/div[2]/div[2]/div/div/div[1]/div/div[2]/div/div/div[2]/div/div/div/div/div/div/div/div/div/div/table/tbody/tr[2]/td[1],/html/body/div/div/div[2]/div[2]/div[2]/div/div/div[1]/div/div[3]/div/div/div[2]/div/div/div/div/div/div/div/div/div/div/table/tbody/tr[2]/td[1],/html/body/div/div/div[2]/div[2]/div[2]/div/div/div[2]/div/div[1]/div/div/div[2]/div/div/div/div/div/div/div/div/div/div/div[2]/table/tbody/tr[2]/td[1],/html/body/div/div/div[2]/div[2]/div[2]/div/div/div[2]/div/div[2]/div/div/div[2]/div/div/div/div/div/div/div/div/div/div/div[2]/table/tbody/tr[2]/td[1],/html/body/div/div/div[2]/div[2]/div[2]/div/div/div[2]/div/div[3]/div/div/div[2]/div/div/div/div/div/div/div/div/div/div/div[2]/table/tbody/tr[2]/td[1],/html/body/div/div/div[2]/div[2]/div[2]/div/div/div[3]/div/div[1]/div/div/div[2]/div/div/div/div/div/div/div[1],/html/body/div/div/div[2]/div[2]/div[2]/div/div/div[3]/div/div[2]/div/div/div[2]/div/div/div/div/div/div[1],/html/body/div/div/div[2]/div[2]/div[2]/div/div/div[3]/div/div[3]/div/div/div[2]/div/div/div/div/div/div/div/div/div/div/div[2]/table/tbody/tr[2]/td[1]",
+    "action": "wait",
+    "marker": "end",
+    "actionValue": "",
+    "measure": 1,
+    "stopOnError": false,
+    "capture": true,
+    "timeout": 30
+  },
+  {
+    "name": "11 click next",
+    "selectorType": "xpath",
+    "selectorValue": "/html/body/div/div/header/div/div/div[2]/div[1]/div/div[2]/div/button",
+    "action": "click",
+    "marker": "none",
+    "actionValue": "",
+    "measure": 1,
+    "stopOnError": false,
+    "timeout": 10
+  },
+  {
+    "name": "98 Refresh Session",
+    "selectorType": "",
+    "selectorValue": "",
+    "action": "script",
+    "marker": "none",
+    "actionValue": "var ajax = new XMLHttpRequest();\najax.open('get', '/refresh-token', false);\najax.send();",
+    "measure": 1,
+    "stopOnError": false,
+    "timeout": 10
+  },
+  {
+    "name": "99 Gap for next",
+    "selectorType": "",
+    "selectorValue": "",
+    "action": "sleep",
+    "marker": "none",
+    "actionValue": "2000",
+    "measure": 1,
+    "stopOnError": false,
+    "timeout": 10
+  }
+]

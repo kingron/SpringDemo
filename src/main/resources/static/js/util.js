@@ -58,3 +58,17 @@ function Toast(msg, duration) {
     }, duration);
 }
 
+function tableDelete(table, from, to) {
+    to = isNaN(to) || to == null ? table.rows.length - 1 : to;
+    for (var i = to; i >= from; i--) {
+        table.deleteRow(i);
+    }
+}
+
+function tableAddRow(table, ...rest) {
+    var row = table.insertRow();
+    rest.forEach((item) => {
+        row.insertCell().textContent = item;
+    });
+    return row;
+}
