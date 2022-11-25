@@ -2477,7 +2477,7 @@ public class Util {
      * @param path 待处理的路径，可以包含或者不包含尾部的路径分隔符
      * @return 包含尾部分隔符的路径
      */
-    public static String pathEndWithSeperator(String path) {
+    public static String pathEndWithSeparator(String path) {
         if (path == null) {
             return null;
         }

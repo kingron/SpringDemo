@@ -886,11 +886,11 @@ public class UtilTest {
 
     @Test
     public void testPathEndWithSeperator() {
-        assertEquals(null, pathEndWithSeperator(null));
-        assertEquals("C:" + File.separator, pathEndWithSeperator("C:"));
-        assertEquals("C:\\TOOLS" + File.separator, pathEndWithSeperator("C:\\TOOLS"));
-        assertEquals("D:\\TEMP" + File.separator, pathEndWithSeperator("D:\\TEMP\\"));
-        assertEquals("/c/a/b" + File.separator, pathEndWithSeperator("/c/a/b\\"));
+        assertEquals(null, pathEndWithSeparator(null));
+        assertEquals("C:" + File.separator, pathEndWithSeparator("C:"));
+        assertEquals("C:\\TOOLS" + File.separator, pathEndWithSeparator("C:\\TOOLS"));
+        assertEquals("D:\\TEMP" + File.separator, pathEndWithSeparator("D:\\TEMP\\"));
+        assertEquals("/c/a/b" + File.separator, pathEndWithSeparator("/c/a/b\\"));
     }
 
     @Test
