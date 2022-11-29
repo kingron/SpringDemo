@@ -182,9 +182,15 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <excludes>
-<!--                    <exclude>**/*.properties</exclude>-->
-<!--                    <exclude>**/*.xml</exclude>-->
+                    <exclude>dev/*</exclude>
+                    <exclude>prod/*</exclude>
+                    <exclude>test/*</exclude>
                 </excludes>
+                <filtering>false</filtering>
+            </resource>
+            <resource> <!-- 这里可以对应环境资源到目标目录 -->
+                <directory>src/main/resources/${profiles.activation}</directory>
+                <targetPath>${project.build.outputDirectory}</targetPath>
                 <filtering>false</filtering>
             </resource>
 
@@ -247,4 +253,28 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <profiles.activation>dev</profiles.activation>
+            </properties>
+            <activation>
+                <!--默认为dev环境打包方式-->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <profiles.activation>test</profiles.activation>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <profiles.activation>prod</profiles.activation>
+            </properties>
+        </profile>
+    </profiles>
 </project>
