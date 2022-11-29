@@ -160,10 +160,41 @@ public class Util {
      */
     public static final long MS_WEEK = MS_DAY * 7;
 
-    private static final Properties properties;
+    private static final Properties properties = new Properties();
+
+    private static final String APPLICATION_PROPERTIES = "application.properties";
 
     static {
-        properties = loadResourceProperties("application.properties");
+        reloadApplicationProperties();
+    }
+
+    /**
+     * 重新读取或加载 application.properties 数据，若外部修改，可以立刻生效
+     */
+    public static void reloadApplicationProperties() {
+        properties.clear();
+
+        // 首先读取 jar 包中的 属性值
+        Properties resProperty = loadResourceProperties(APPLICATION_PROPERTIES);
+        properties.putAll(resProperty);
+
+        // 其次读取 程序目录下所在的，然后 替换掉 jar 中相同的
+        // jar 所在目录下的 application.properties > jar 包中的 application.properties
+        String file = getAppPath() + APPLICATION_PROPERTIES;
+        if (new File(file).exists()) {
+            Properties fileProperty = loadProperties(file);
+            properties.putAll(fileProperty);
+        }
+    }
+
+    /**
+     * 判断程序是否在 Jar 中运行
+     *
+     * @return 如果在 Jar 中运行，则返回 true，否则返回 false
+     */
+    public static boolean isJar() {
+        URL url = Util.class.getResource("");
+        return "jar".equals(url.getProtocol());
     }
 
     /**
@@ -3962,7 +3993,7 @@ public class Util {
             //截取路径中的jar包名,可执行jar包运行的结果里包含".jar"
             filePath = filePath.substring(0, filePath.lastIndexOf(File.separator) + 1);
         }
-        return filePath;
+        return pathEndWithSeparator(filePath);
     }
 
     /**

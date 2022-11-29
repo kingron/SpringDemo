@@ -18,7 +18,7 @@ import javax.sql.DataSource;
  *
  * @since 1.0
  */
-@Configuration
+//@Configuration
 @Slf4j
 public class DataSourceInit {
     @Value("classpath:db/schema.sql")
