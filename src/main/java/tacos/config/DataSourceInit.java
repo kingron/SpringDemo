@@ -3,7 +3,6 @@ package tacos.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,6 +25,9 @@ public class DataSourceInit {
     @Value("classpath:db/data.sql")
     private Resource dml;
 
+    @Value("classpath:db/migrate.sql")
+    private Resource migrate;
+
     @Bean
     public DataSourceInitializer dataSourceInitializer(final DataSource dataSource) {
         final DataSourceInitializer initializer = new DataSourceInitializer();
@@ -41,6 +43,9 @@ public class DataSourceInit {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         try {
             jdbcTemplate.queryForMap("select count(1) from ete_result");
+            // Migrate script must use $ as SQL statement separator
+            populator.setSeparator("$");
+            populator.addScripts(migrate);
         } catch (DataAccessException e) {
             log.warn("初始化脚本报错:" + e.getMessage());
             // 报错,表不存在,初次导入，执行相关脚本
