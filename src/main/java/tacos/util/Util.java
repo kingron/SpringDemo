@@ -1,5 +1,8 @@
 package tacos.util;
 
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -9,10 +12,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.SocketTimeoutException;
-import java.net.URL;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
@@ -253,6 +253,54 @@ public class Util {
 
         } catch (Exception e) {
             return "";
+        }
+    }
+
+    private static String getPomVersion() {
+        String versionStr = "";
+        //项目路径
+        String pathStr = System.getProperty("user.dir");
+        MavenXpp3Reader mx3Reader = new MavenXpp3Reader();
+        String pomPath = pathStr + File.separator + "pom.xml";
+        pomPath = URLDecoder.decode(pomPath, StandardCharsets.UTF_8);//编码为utf-8
+        try {
+            Model model = mx3Reader.read(new FileReader(pomPath));
+            versionStr = model.getVersion();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return versionStr;
+    }
+
+    /**
+     * 利用PowerShell获取 Windows 可执行程序文件版本号，支持 EXE, DLL，只能支持Windows 10以上版本
+     *
+     * @param filename EXE, DLL等可执行文件路径
+     * @return 文件版本号
+     */
+    public static String getFileVersion(String filename) {
+        if (!new File(filename).exists()) return null;
+
+        String cmd = "powershell (Get-Command \'" + filename + "\').FileVersionInfo.FileVersion";
+        return join(exec(cmd), "\n");
+    }
+
+    /**
+     * 返回应用程序的版本号
+     *
+     * @return
+     */
+    public static String getAppVersion() {
+        String versionStr = "";
+        //得到路径（开发环境没有.jar；jar包中存在.jar）
+        String pathStr = Util.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        pathStr = URLDecoder.decode(pathStr, StandardCharsets.UTF_8);//编码为utf-8
+        if (pathStr.indexOf(".jar") == -1) {
+            //此为开发环境
+            return getPomVersion();
+        } else {
+            //jar包
+            return Util.class.getPackage().getImplementationVersion();
         }
     }
 
@@ -2514,7 +2562,7 @@ public class Util {
         }
 
         String s = right(path, 1);
-        if (s == File.separator || s.equals("/") || s.equals("\\")) {
+        if (s.equals(File.separator) || s.equals("/") || s.equals("\\")) {
             return path;
         }
 
